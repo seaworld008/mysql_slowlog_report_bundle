@@ -241,38 +241,16 @@ pip install elasticsearch
 pip install elasticsearch[async]
 ```
 
-### **🔧 基本配置示例**
-
-#### **无认证ES集群（测试环境）**
+### **🔧 ES集成示例**
 ```bash
+# 基础连接
 python mysql_slowlog_analyzer.py ./slow.log --today \
   --es-host "http://localhost:9200"
-```
 
-#### **用户名密码认证**
-```bash
+# 企业级配置（推荐）
 python mysql_slowlog_analyzer.py ./slow.log --today \
   --es-host "https://es-cluster:9200" \
-  --es-user "elastic" \
-  --es-password "your_password"
-```
-
-#### **自签名证书环境**
-```bash
-python mysql_slowlog_analyzer.py ./slow.log --today \
-  --es-host "https://es-cluster:9200" \
-  --es-user "elastic" \
-  --es-password "your_password" \
-  --es-no-verify-certs
-```
-
-#### **企业级配置（CA证书）**
-```bash
-python mysql_slowlog_analyzer.py ./slow.log --today \
-  --es-host "https://es-cluster:9200" \
-  --es-user "elastic" \
-  --es-password "your_password" \
-  --es-ca-certs "/path/to/ca.crt" \
+  --es-user "elastic" --es-password "your_password" \
   --es-hostname "mysql-prod-01"
 ```
 
@@ -630,29 +608,17 @@ python mysql_slowlog_analyzer.py 10GB_slow.log --days 30 --stats
 
 ---
 
-## 🗓️ 与生产结合（示例）
-### 定时任务
+## 🗓️ 生产环境集成
+
+### 🐳 Docker部署（推荐）
+详见上方"Docker部署"章节，支持自动定时分析和ES集成。
+
+### 📋 手动定时任务
+如不使用Docker，可配置传统crontab：
 ```bash
-# crontab（每天 02:10）- 智能时间过滤版
+# 每天分析昨日慢查询
 10 2 * * * /usr/bin/python3 /opt/tools/mysql_slowlog_analyzer.py /var/log/mysql/slow.log \
-  --today \
-  --out-csv /data/reports/slow_today_$(date +\%F).csv \
-  --out-md  /data/reports/slow_top20_$(date +\%F).md \
-  --top 20 --lang zh --min-time 2 --exclude-dumps --stats
-
-# crontab（每周一 03:00）- 周报分析
-0 3 * * 1 /usr/bin/python3 /opt/tools/mysql_slowlog_analyzer.py /var/log/mysql/slow.log \
-  --days 7 \
-  --out-csv /data/reports/slow_weekly_$(date +\%F).csv \
-  --out-md  /data/reports/slow_weekly_top20_$(date +\%F).md \
-  --top 20 --lang zh --min-time 1 --exclude-dumps --stats
-
-# crontab（每天 02:30）- ES集成：实时监控用
-30 2 * * * /usr/bin/python3 /opt/tools/mysql_slowlog_analyzer.py /var/log/mysql/slow.log \
-  --today --lang zh --min-time 2 --exclude-dumps --jobs 8 --loose-start --stats \
-  --es-host "https://es-cluster:9200" --es-user "elastic" --es-password "your_password" \
-  --es-hostname "mysql-prod-$(hostname -s)" \
-  >> /var/log/slowlog-analyzer.log 2>&1
+  --today --out-csv /data/reports/slow_$(date +\%F).csv --lang zh --min-time 1 --exclude-dumps --stats
 ```
 
 ### BI 集成
