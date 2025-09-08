@@ -149,6 +149,50 @@ python mysql_slowlog_analyzer.py ./slow.log --today --out-csv ./slow_today_es.cs
 
 ---
 
+## 🐳 Docker部署（推荐）
+
+### 🚀 一键部署
+适用于生产环境的定时分析和ES集成：
+
+```bash
+# 1. 下载项目
+git clone https://github.com/seaworld008/mysql_slowlog_report_bundle.git
+cd mysql_slowlog_report_bundle
+
+# 2. 配置ES连接（修改config.env）
+ES_HOST=http://your-es-server:9200
+ES_USER=elastic
+ES_PASSWORD=your_password
+
+# 3. 放置慢日志文件
+cp /var/log/mysql/slow.log ./slowlogs/
+
+# 4. 启动服务
+./start.sh    # Linux/macOS
+# 或
+start.bat     # Windows
+```
+
+### 📋 自动化任务
+- **每天2点**: 分析当天数据，TOP 30自动写入ES
+- **每周一3点**: 分析最近7天，TOP 30写入ES
+- **每月1号4点**: 分析最近30天，TOP 50写入ES
+
+### 🔧 管理命令
+```bash
+# 查看实时日志
+docker-compose logs -f
+
+# 停止/重启服务
+docker-compose down
+docker-compose restart
+
+# 手动执行分析
+docker-compose exec mysql-slowlog-analyzer python mysql_slowlog_analyzer.py /app/slowlogs/*.log --today --top 30
+```
+
+---
+
 ## 📡 Elasticsearch 集成
 
 ### **🎯 功能特点**

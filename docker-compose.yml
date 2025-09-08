@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mysql-slowlog-analyzer:
+    build: .
+    container_name: mysql_slowlog_analyzer
+    restart: unless-stopped
+    
+    # 环境变量
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1
+      # Elasticsearch配置（必须配置）
+      - ES_HOST=${ES_HOST}
+      - ES_USER=${ES_USER}
+      - ES_PASSWORD=${ES_PASSWORD}
+      - HOSTNAME=${ANALYZER_HOSTNAME:-mysql-slowlog-analyzer}
+    
+    # 目录挂载
+    volumes:
+      # 慢日志文件目录（只读）
+      - ./slowlogs:/app/slowlogs:ro
+      # 分析结果输出目录
+      - ./output:/app/output
+      # 运行日志目录
+      - ./logs:/app/logs
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.2'
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"

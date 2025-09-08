@@ -1,0 +1,15 @@
+# MySQL慢日志分析工具 - 定时任务配置
+# 每天凌晨2点执行全天分析，TOP 30写入ES，同时生成本地CSV
+0 2 * * * cd /app && python mysql_slowlog_analyzer.py /app/slowlogs/*.log --today --out-csv /app/output/slowlog_daily_$(date +\%Y\%m\%d).csv --top 30 --lang zh --min-time 0.5 --exclude-dumps --jobs 2 --stats --es-host "$ES_HOST" --es-user "$ES_USER" --es-password "$ES_PASSWORD" --es-hostname "$HOSTNAME" >> /app/logs/daily_$(date +\%Y\%m\%d).log 2>&1
+
+# 每周一凌晨3点执行周报分析，TOP 30写入ES
+0 3 * * 1 cd /app && python mysql_slowlog_analyzer.py /app/slowlogs/*.log --days 7 --out-csv /app/output/slowlog_weekly_$(date +\%Y\%m\%d).csv --top 30 --lang zh --min-time 0.1 --exclude-dumps --jobs 2 --stats --es-host "$ES_HOST" --es-user "$ES_USER" --es-password "$ES_PASSWORD" --es-hostname "$HOSTNAME" >> /app/logs/weekly_$(date +\%Y\%m\%d).log 2>&1
+
+# 每月1号凌晨4点执行月报分析，TOP 50写入ES
+0 4 1 * * cd /app && python mysql_slowlog_analyzer.py /app/slowlogs/*.log --days 30 --out-csv /app/output/slowlog_monthly_$(date +\%Y\%m\%d).csv --top 50 --lang zh --min-time 0.1 --exclude-dumps --jobs 2 --stats --es-host "$ES_HOST" --es-user "$ES_USER" --es-password "$ES_PASSWORD" --es-hostname "$HOSTNAME" >> /app/logs/monthly_$(date +\%Y\%m\%d).log 2>&1
+
+# 每天凌晨1点清理30天前的输出文件
+0 1 * * * find /app/output -name "slowlog_*" -mtime +30 -delete >> /app/logs/cleanup_$(date +\%Y\%m\%d).log 2>&1
+
+# 每天凌晨1点清理7天前的日志文件
+0 1 * * * find /app/logs -name "*.log" -mtime +7 -delete >> /app/logs/cleanup_$(date +\%Y\%m\%d).log 2>&1
