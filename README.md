@@ -159,13 +159,22 @@ python mysql_slowlog_analyzer.py ./slow.log --today --out-csv ./slow_today_es.cs
 git clone https://github.com/seaworld008/mysql_slowlog_report_bundle.git
 cd mysql_slowlog_report_bundle
 
-# 2. 配置ES连接（修改config.env）
+# 2. 配置环境（修改config.env）
+# MySQL慢日志路径
+SLOWLOG_HOST_PATH=/var/log/mysql          # 主机上的慢日志目录
+SLOWLOG_PATH=/app/slowlogs/slow*.log      # 容器内文件路径
+
+# TOP数量配置  
+TOP_DAILY=30     # 每天分析TOP数量
+TOP_WEEKLY=50    # 每周分析TOP数量
+TOP_MONTHLY=100  # 每月分析TOP数量
+
+# ES连接配置
 ES_HOST=http://your-es-server:9200
 ES_USER=elastic
 ES_PASSWORD=your_password
 
-# 3. 放置慢日志文件
-cp /var/log/mysql/slow.log ./slowlogs/
+# 3. 无需手动复制文件（直接挂载主机目录）
 
 # 4. 启动服务
 ./start.sh    # Linux/macOS
@@ -174,9 +183,10 @@ start.bat     # Windows
 ```
 
 ### 📋 自动化任务
-- **每天2点**: 分析当天数据，TOP 30自动写入ES
-- **每周一3点**: 分析最近7天，TOP 30写入ES
-- **每月1号4点**: 分析最近30天，TOP 50写入ES
+- **每天2点**: 分析当天数据，TOP ${TOP_DAILY}自动写入ES
+- **每周一3点**: 分析最近7天，TOP ${TOP_WEEKLY}写入ES
+- **每月1号4点**: 分析最近30天，TOP ${TOP_MONTHLY}写入ES
+- **配置灵活**: 通过config.env轻松调整TOP数量和路径
 
 ### 🔧 管理命令
 ```bash
@@ -189,6 +199,23 @@ docker-compose restart
 
 # 手动执行分析
 docker-compose exec mysql-slowlog-analyzer python mysql_slowlog_analyzer.py /app/slowlogs/*.log --today --top 30
+```
+
+### 📝 配置文件说明 (config.env)
+```bash
+# MySQL慢日志配置
+SLOWLOG_HOST_PATH=/var/log/mysql      # 主机慢日志目录（绝对路径）
+SLOWLOG_PATH=/app/slowlogs/slow*.log  # 容器内路径（支持通配符）
+
+# TOP数量配置（灵活调整）
+TOP_DAILY=30      # 每天TOP数量
+TOP_WEEKLY=50     # 每周TOP数量  
+TOP_MONTHLY=100   # 每月TOP数量
+
+# 其他配置
+MIN_TIME=0.5      # 最小执行时间阈值（秒）
+JOBS=2            # 并发进程数
+EXCLUDE_DUMPS=true # 是否排除dump操作
 ```
 
 ---
