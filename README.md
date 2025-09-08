@@ -329,21 +329,27 @@ python mysql_slowlog_analyzer.py ./slow.log --today \
 | `mysql.slowlog.database` | 数据库名 | `ecommerce` |
 | `mysql.slowlog.query_time.avg_seconds` | 平均查询时间 | `8.04` |
 
-### **📈 Kibana 可视化建议**
+### **📈 Kibana 仪表板（推荐）**
 
-#### **🔍 数据源过滤（类似filebeat）**
-- **按主机筛选**：`host.name: "mysql-prod-01"`
-- **按文件路径筛选**：`log.file.path: "/var/log/mysql/slow.log"`
-- **按服务筛选**：`service.name: "mysql"`
+我们提供了完整的Kibana仪表板配置指南，实现：
+- **🏆 TOP慢查询实时排行榜**
+- **📊 多维度性能分析图表**  
+- **🔔 告警监控和趋势分析**
+- **🎯 交互式数据钻取**
 
-#### **📊 性能监控仪表板**
-1. **时间序列图**：`mysql.slowlog.query_time.total_seconds` 按 `@timestamp` 分组
-2. **TopN表格**：按 `mysql.slowlog.share.time_percent` 降序的慢查询排行
-3. **饼图分析**：按 `mysql.slowlog.database` 或 `mysql.slowlog.table` 分组的耗时占比
-4. **多维对比**：
-   - 不同主机：`host.name` 维度对比
-   - 不同文件：`log.file.name` 维度对比
-   - 不同数据库：`mysql.slowlog.database` 维度对比
+**详细配置步骤**: 👉 [KIBANA_DASHBOARD.md](KIBANA_DASHBOARD.md)
+
+#### **🔍 快速可视化示例**
+```
+数据源过滤：
+- host.name: "mysql-prod-01"
+- mysql.slowlog.database: "ecommerce"
+
+核心图表：
+- TOP慢查询表格：mysql.slowlog.query_time.total_seconds 降序
+- 时间趋势图：按@timestamp分组的性能变化
+- 数据库分布：按mysql.slowlog.database的耗时占比
+```
 
 #### **🚨 告警配置示例**
 ```json
