@@ -1,0 +1,13 @@
+# MySQL慢日志智能分析器依赖包
+
+# 核心数据处理
+numpy>=1.20.0
+pandas>=1.3.0
+
+# Elasticsearch集成 (可选)
+elasticsearch>=8.0.0,<9.0.0
+
+# 说明：
+# - numpy 和 pandas 是必需的，用于数据处理和统计计算
+# - elasticsearch 是可选的，仅在使用 --es-host 参数时需要
+# - 所有其他依赖都是Python标准库，无需额外安装
