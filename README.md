@@ -152,7 +152,7 @@ python mysql_slowlog_analyzer.py ./slow.log --today --out-csv ./slow_today_es.cs
 ## 🐳 Docker部署（推荐）
 
 ### 🚀 一键部署
-适用于生产环境的定时分析和ES集成（兼容Docker Compose 1.6+）：
+适用于生产环境的定时分析和ES集成：
 
 ```bash
 # 1. 下载项目
@@ -219,14 +219,7 @@ EXCLUDE_DUMPS=true # 是否排除dump操作
 ```
 
 ### 🔧 Docker版本兼容性
-- **推荐版本**: Docker Compose 1.20+ (支持所有特性)
-- **最低版本**: Docker Compose 1.6+ (使用docker-compose.yml)
-- **老版本**: Docker Compose 1.12+ (使用docker-compose.legacy.yml)
-
-```bash
-# 如果遇到版本兼容问题，可使用legacy版本
-docker-compose -f docker-compose.legacy.yml up -d
-```
+兼容Docker Compose 1.6+版本，支持绝大多数生产环境。
 
 ---
 

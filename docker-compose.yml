@@ -33,10 +33,9 @@ services:
       # 运行日志目录
       - ./logs:/app/logs
     
-    # 资源限制（使用通用格式）
+    # 资源限制
     mem_limit: 2g
     cpus: 2.0
-    mem_reservation: 256m
     
     # 日志配置
     logging:
