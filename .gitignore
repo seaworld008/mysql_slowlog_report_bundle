@@ -34,6 +34,7 @@ slow_*.md
 *.md
 !README.md
 !FINAL_SUMMARY.md
+!KIBANA_DASHBOARD.md
 
 # 日志文件
 *.log
