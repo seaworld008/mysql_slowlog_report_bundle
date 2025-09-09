@@ -1,0 +1,57 @@
+version: '3.3'
+
+services:
+  mysql-slowlog-analyzer:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mysql_slowlog_analyzer_dev
+    restart: "no"  # 开发环境不自动重启
+    
+    # 环境变量
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1
+      # MySQL慢日志配置
+      - SLOWLOG_PATH=${SLOWLOG_PATH:-/app/slowlogs/*.log}
+      - TOP_DAILY=${TOP_DAILY:-10}
+      - TOP_WEEKLY=${TOP_WEEKLY:-20}
+      - TOP_MONTHLY=${TOP_MONTHLY:-30}
+      - MIN_TIME=${MIN_TIME:-0.5}
+      - JOBS=${JOBS:-2}
+      - EXCLUDE_DUMPS=${EXCLUDE_DUMPS:-false}
+      # Elasticsearch配置
+      - ES_HOST=${ES_HOST}
+      - ES_USER=${ES_USER}
+      - ES_PASSWORD=${ES_PASSWORD}
+      - HOSTNAME=${ANALYZER_HOSTNAME:-mysql-slowlog-analyzer-dev}
+    
+    # 目录挂载
+    volumes:
+      # 慢日志文件目录（开发环境使用相对路径）
+      - ${SLOWLOG_HOST_PATH:-../slowlogs}:/app/slowlogs:ro
+      # 分析结果输出目录
+      - ../output:/app/output
+      # 运行日志目录
+      - ../logs:/app/logs
+      # 开发环境可以挂载源码进行调试
+      - ../src:/app/src:ro
+    
+    # 环境变量文件
+    env_file:
+      - ../config/config.dev.env
+    
+    # 开发环境资源限制较小
+    mem_limit: 1g
+    cpus: 1.0
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    
+    # 开发环境可以映射端口用于调试
+    # ports:
+    #   - "8080:8080"  # 如果需要调试端口

@@ -159,7 +159,7 @@ python mysql_slowlog_analyzer.py ./slow.log --today --out-csv ./slow_today_es.cs
 git clone https://github.com/seaworld008/mysql_slowlog_report_bundle.git
 cd mysql_slowlog_report_bundle
 
-# 2. 配置环境（修改config.env）
+# 2. 配置环境（修改config/config.env）
 # MySQL慢日志路径
 SLOWLOG_HOST_PATH=/var/log/mysql          # 主机上的慢日志目录
 SLOWLOG_PATH=/app/slowlogs/slow*.log      # 容器内文件路径
@@ -177,9 +177,9 @@ ES_PASSWORD=your_password
 # 3. 无需手动复制文件（直接挂载主机目录）
 
 # 4. 启动服务
-./start.sh    # Linux/macOS
+./docker/scripts/start.sh    # Linux/macOS
 # 或
-start.bat     # Windows
+docker\scripts\start.bat     # Windows
 ```
 
 ### 📋 自动化任务
@@ -191,17 +191,34 @@ start.bat     # Windows
 ### 🔧 管理命令
 ```bash
 # 查看实时日志
-docker-compose logs -f
+docker-compose -f docker/docker-compose.yml logs -f
 
 # 停止/重启服务
-docker-compose down
-docker-compose restart
+docker-compose -f docker/docker-compose.yml down
+docker-compose -f docker/docker-compose.yml restart
 
 # 手动执行分析
-docker-compose exec mysql-slowlog-analyzer python mysql_slowlog_analyzer.py /app/slowlogs/*.log --today --top 30
+docker-compose -f docker/docker-compose.yml exec mysql-slowlog-analyzer python mysql_slowlog_analyzer.py /app/slowlogs/*.log --today --top 30
+
+# 多环境部署
+# 开发环境
+docker-compose -f docker/docker-compose.dev.yml up -d
+
+# 生产环境
+docker-compose -f docker/docker-compose.prod.yml up -d
 ```
 
-### 📝 配置文件说明 (config.env)
+### 📝 配置文件说明
+项目现在支持多环境配置，配置文件位于 `config/` 目录：
+
+```bash
+config/
+├── config.env      # 默认配置（生产环境）
+├── config.dev.env  # 开发环境配置
+└── config.prod.env # 生产环境配置
+```
+
+**基本配置项：**
 ```bash
 # MySQL慢日志配置
 SLOWLOG_HOST_PATH=/var/log/mysql      # 主机慢日志目录（绝对路径）
@@ -623,7 +640,7 @@ python mysql_slowlog_analyzer.py 10GB_slow.log --days 30 --stats
 如不使用Docker，可配置传统crontab：
 ```bash
 # 每天分析昨日慢查询
-10 2 * * * /usr/bin/python3 /opt/tools/mysql_slowlog_analyzer.py /var/log/mysql/slow.log \
+10 2 * * * /usr/bin/python3 /opt/tools/src/mysql_slowlog_analyzer.py /var/log/mysql/slow.log \
   --today --out-csv /data/reports/slow_$(date +\%F).csv --lang zh --min-time 1 --exclude-dumps --stats
 ```
 

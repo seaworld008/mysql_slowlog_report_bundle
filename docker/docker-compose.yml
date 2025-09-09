@@ -2,7 +2,9 @@ version: '3.3'
 
 services:
   mysql-slowlog-analyzer:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: mysql_slowlog_analyzer
     restart: unless-stopped
     
@@ -27,11 +29,15 @@ services:
     # 目录挂载
     volumes:
       # 慢日志文件目录（支持绝对路径，只读）
-      - ${SLOWLOG_HOST_PATH:-./slowlogs}:/app/slowlogs:ro
+      - ${SLOWLOG_HOST_PATH:-../slowlogs}:/app/slowlogs:ro
       # 分析结果输出目录
-      - ./output:/app/output
+      - ../output:/app/output
       # 运行日志目录
-      - ./logs:/app/logs
+      - ../logs:/app/logs
+    
+    # 环境变量文件
+    env_file:
+      - ../config/config.env
     
     # 资源限制
     mem_limit: 2g
