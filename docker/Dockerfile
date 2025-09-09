@@ -24,9 +24,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
 
 # 复制应用文件
-COPY mysql_slowlog_analyzer.py .
-COPY docker-entrypoint.sh .
-COPY crontab-config .
+COPY src/mysql_slowlog_analyzer.py .
+COPY docker/scripts/docker-entrypoint.sh .
+COPY config/crontab-config .
 
 # 设置执行权限
 RUN chmod +x docker-entrypoint.sh

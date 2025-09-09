@@ -1,0 +1,68 @@
+version: '3.3'
+
+services:
+  mysql-slowlog-analyzer:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: mysql_slowlog_analyzer_prod
+    restart: unless-stopped
+    
+    # 环境变量
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1
+      # MySQL慢日志配置
+      - SLOWLOG_PATH=${SLOWLOG_PATH:-/app/slowlogs/*.log}
+      - TOP_DAILY=${TOP_DAILY:-50}
+      - TOP_WEEKLY=${TOP_WEEKLY:-100}
+      - TOP_MONTHLY=${TOP_MONTHLY:-200}
+      - MIN_TIME=${MIN_TIME:-2.0}
+      - JOBS=${JOBS:-8}
+      - EXCLUDE_DUMPS=${EXCLUDE_DUMPS:-true}
+      # Elasticsearch配置
+      - ES_HOST=${ES_HOST}
+      - ES_USER=${ES_USER}
+      - ES_PASSWORD=${ES_PASSWORD}
+      - HOSTNAME=${ANALYZER_HOSTNAME:-mysql-slowlog-analyzer-prod}
+    
+    # 目录挂载
+    volumes:
+      # 慢日志文件目录（生产环境使用绝对路径）
+      - ${SLOWLOG_HOST_PATH:-/var/log/mysql}:/app/slowlogs:ro
+      # 分析结果输出目录
+      - ../output:/app/output
+      # 运行日志目录
+      - ../logs:/app/logs
+    
+    # 环境变量文件
+    env_file:
+      - ../config/config.prod.env
+    
+    # 生产环境资源限制
+    mem_limit: 4g
+    cpus: 4.0
+    
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "mysql_slowlog_analyzer"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # 生产环境安全配置
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # 需要写入日志和输出文件
+    
+    # 网络配置（如果需要）
+    # networks:
+    #   - monitoring
